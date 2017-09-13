@@ -25,19 +25,14 @@ import UIKit
 open class KeyboardLayoutConstraint: NSLayoutConstraint {
     
     @IBInspectable var topOffset: CGFloat = 12
-    @IBInspectable var object: AnyObject!
     
-    fileprivate var offset : CGFloat = 0
-    fileprivate var keyboardVisibleHeight : CGFloat = 0
+    fileprivate var object: AnyObject!
+    fileprivate var keyboardAddedHeight : CGFloat = 0
     
     override open func awakeFromNib() {
         super.awakeFromNib()
         
-        guard let object = self.object, let frame = object.frame else {
-            return
-        }
-        
-        offset = constant - (frame.origin.y + frame.size.height)
+        self.firstItem.tag == 1000 ? (object = self.firstItem) : (object = self.secondItem)
         
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShowNotification), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHideNotification), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
@@ -53,7 +48,7 @@ open class KeyboardLayoutConstraint: NSLayoutConstraint {
         if let userInfo = notification.userInfo {
             if let frameValue = userInfo[UIKeyboardFrameEndUserInfoKey] as? NSValue {
                 let frame = frameValue.cgRectValue
-                keyboardVisibleHeight = frame.size.height
+                keyboardAddedHeight = frame.size.height - (UIScreen.main.bounds.height - (self.object.frame.origin.y + self.object.frame.size.height)) + constant
             }
             
             self.updateConstant()
@@ -81,7 +76,7 @@ open class KeyboardLayoutConstraint: NSLayoutConstraint {
     }
     
     func keyboardWillHideNotification(notification: NSNotification) {
-        keyboardVisibleHeight = 0
+        keyboardAddedHeight = 0
         self.updateConstant()
         
         if let userInfo = notification.userInfo {
@@ -107,7 +102,8 @@ open class KeyboardLayoutConstraint: NSLayoutConstraint {
     }
     
     func updateConstant() {
-        self.constant = offset + keyboardVisibleHeight
+        self.constant = topOffset + keyboardAddedHeight
     }
     
 }
+
