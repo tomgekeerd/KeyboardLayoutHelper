@@ -26,12 +26,14 @@ open class KeyboardLayoutConstraint: NSLayoutConstraint {
     
     @IBInspectable var topOffset: CGFloat = 12
     
+    fileprivate var originalConstant: CGFloat!
     fileprivate var object: AnyObject!
     fileprivate var keyboardAddedHeight : CGFloat = 0
     
     override open func awakeFromNib() {
         super.awakeFromNib()
         
+        self.originalConstant = self.constant
         self.firstItem.tag == 1000 ? (object = self.firstItem) : (object = self.secondItem)
         
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShowNotification), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
@@ -102,8 +104,11 @@ open class KeyboardLayoutConstraint: NSLayoutConstraint {
     }
     
     func updateConstant() {
-        self.constant = topOffset + keyboardAddedHeight
+        if self.keyboardAddedHeight == 0 {
+            self.constant = self.originalConstant
+        } else {
+            self.constant = topOffset + keyboardAddedHeight
+        }
     }
     
 }
-
