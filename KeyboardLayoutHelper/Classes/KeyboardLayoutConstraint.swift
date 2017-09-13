@@ -24,13 +24,20 @@ import UIKit
 
 open class KeyboardLayoutConstraint: NSLayoutConstraint {
     
+    @IBInspectable var topOffset: CGFloat = 12
+    @IBInspectable var object: AnyObject!
+    
     fileprivate var offset : CGFloat = 0
     fileprivate var keyboardVisibleHeight : CGFloat = 0
     
     override open func awakeFromNib() {
         super.awakeFromNib()
         
-        offset = constant
+        guard let object = self.object, let frame = object.frame else {
+            return
+        }
+        
+        offset = constant - (frame.origin.y + frame.size.height)
         
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShowNotification), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHideNotification), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
